@@ -1,1 +1,36 @@
+# =====================
+# Environment variables
 .env
+.env.*
+!.env.example
+
+# =====================
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+.env/
+
+# =====================
+# Node / Frontend
+node_modules/
+dist/
+build/
+
+# =====================
+# Logs
+*.log
+
+# =====================
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# =====================
+# Docker
+docker-data/

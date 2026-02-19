@@ -18,7 +18,12 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+from app.core.db import Base
+from app.models.user import User  # noqa: F401  让模型被导入注册到 Base
+from app.models.application import Application  # noqa: F401
+from app.models.status_log import ApplicationStatusLog  # noqa: F401
+
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

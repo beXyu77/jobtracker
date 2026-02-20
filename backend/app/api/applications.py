@@ -11,6 +11,10 @@ from app.models.user import User
 from app.models.application import Application
 from app.models.status_log import ApplicationStatusLog
 
+from typing import Optional, List, Dict, Any
+from fastapi import Query
+from sqlalchemy import or_
+
 router = APIRouter(prefix="/applications", tags=["applications"])
 
 ALLOWED_STATUSES = [
@@ -97,18 +101,56 @@ def _get_owned_application(db: Session, user_id: int, app_id: int) -> Applicatio
     return app
 
 
-@router.get("", response_model=List[ApplicationOut])
+@router.get("")
 def list_applications(
+    q: Optional[str] = Query(default=None, max_length=200),
+    status: Optional[str] = Query(default=None, max_length=50),
+    sort: str = Query(default="updated_desc"),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=50, ge=1, le=200),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
-):
-    apps = (
-        db.query(Application)
-        .filter(Application.user_id == user.id)
-        .order_by(Application.updated_at.desc())
+) -> Dict[str, Any]:
+    query = db.query(Application).filter(Application.user_id == user.id)
+
+    if status:
+        query = query.filter(Application.status == status)
+
+    if q:
+        like = f"%{q.strip()}%"
+        query = query.filter(
+            or_(
+                Application.company.ilike(like),
+                Application.position.ilike(like),
+                Application.location.ilike(like),
+                Application.platform.ilike(like),
+            )
+        )
+
+    # 排序
+    if sort == "updated_asc":
+        query = query.order_by(Application.updated_at.asc())
+    elif sort == "applied_desc":
+        query = query.order_by(Application.applied_at.desc().nullslast())
+    elif sort == "applied_asc":
+        query = query.order_by(Application.applied_at.asc().nullsfirst())
+    else:  # updated_desc
+        query = query.order_by(Application.updated_at.desc())
+
+    total = query.count()
+
+    items = (
+        query.offset((page - 1) * page_size)
+        .limit(page_size)
         .all()
     )
-    return apps
+
+    return {
+        "items": items,
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+    }
 
 
 @router.post("", response_model=ApplicationOut)

@@ -1,4 +1,5 @@
-import { useApplicationDetail } from "../hooks";
+import { useEffect, useState } from "react";
+import { useApplicationDetail, useUpdateApplication } from "../hooks";
 
 export default function ApplicationDrawer({
   appId,
@@ -8,8 +9,41 @@ export default function ApplicationDrawer({
   onClose: () => void;
 }) {
   const { data, isLoading, isError } = useApplicationDetail(appId);
+  const updateMut = useUpdateApplication();
+
+  const [url, setUrl] = useState("");
+  const [location, setLocation] = useState("");
+  const [platform, setPlatform] = useState("");
+  const [appliedAt, setAppliedAt] = useState(""); // yyyy-mm-dd
+  const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    if (!data) return;
+    setUrl(data.url ?? "");
+    setLocation(data.location ?? "");
+    setPlatform(data.platform ?? "");
+    setAppliedAt((data.applied_at ?? "") as string);
+    setNotes(data.notes ?? "");
+  }, [data?.id]);
 
   if (!appId) return null;
+
+  const onSave = async () => {
+    if (!data) return;
+
+    await updateMut.mutateAsync({
+      appId: data.id,
+      input: {
+        url: url || null,
+        location: location || null,
+        platform: platform || null,
+        applied_at: appliedAt || null,
+        notes: notes || null,
+      },
+    });
+
+    onClose();
+  };
 
   return (
     <div
@@ -26,7 +60,7 @@ export default function ApplicationDrawer({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: 420,
+          width: 460,
           height: "100%",
           background: "white",
           padding: 16,
@@ -48,27 +82,81 @@ export default function ApplicationDrawer({
 
             <div style={{ marginTop: 12, fontSize: 14 }}>
               <div><b>Status:</b> {data.status}</div>
-              {data.location && <div><b>Location:</b> {data.location}</div>}
-              {data.platform && <div><b>Platform:</b> {data.platform}</div>}
-              {data.applied_at && <div><b>Applied At:</b> {data.applied_at}</div>}
-              {data.url && (
-                <div>
-                  <b>URL:</b>{" "}
-                  <a href={data.url} target="_blank" rel="noreferrer">
-                    {data.url}
-                  </a>
-                </div>
-              )}
+              <div style={{ opacity: 0.7, fontSize: 12, marginTop: 4 }}>
+                Updated: {new Date(data.updated_at).toLocaleString()}
+              </div>
             </div>
 
-            {data.notes && (
-              <div style={{ marginTop: 12 }}>
-                <b>Notes</b>
-                <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>{data.notes}</div>
-              </div>
-            )}
+            {/* Editable fields */}
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+              <label style={{ fontSize: 13 }}>
+                URL
+                <input
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://..."
+                  style={{ width: "100%", padding: 8, marginTop: 4 }}
+                />
+              </label>
 
-            <div style={{ marginTop: 16 }}>
+              <div style={{ display: "flex", gap: 10 }}>
+                <label style={{ fontSize: 13, flex: 1 }}>
+                  Location
+                  <input
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="Chiang Mai"
+                    style={{ width: "100%", padding: 8, marginTop: 4 }}
+                  />
+                </label>
+
+                <label style={{ fontSize: 13, flex: 1 }}>
+                  Platform
+                  <input
+                    value={platform}
+                    onChange={(e) => setPlatform(e.target.value)}
+                    placeholder="LinkedIn / JobDB"
+                    style={{ width: "100%", padding: 8, marginTop: 4 }}
+                  />
+                </label>
+              </div>
+
+              <label style={{ fontSize: 13 }}>
+                Applied At
+                <input
+                  type="date"
+                  value={appliedAt}
+                  onChange={(e) => setAppliedAt(e.target.value)}
+                  style={{ padding: 8, marginTop: 4 }}
+                />
+              </label>
+
+              <label style={{ fontSize: 13 }}>
+                Notes
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Write notes..."
+                  rows={5}
+                  style={{ width: "100%", padding: 8, marginTop: 4 }}
+                />
+              </label>
+
+              {updateMut.isError && (
+                <div style={{ color: "crimson" }}>Save failed</div>
+              )}
+
+              <button
+                onClick={onSave}
+                disabled={updateMut.isPending}
+                style={{ padding: "10px 12px" }}
+              >
+                {updateMut.isPending ? "Saving..." : "Save"}
+              </button>
+            </div>
+
+            {/* History */}
+            <div style={{ marginTop: 18 }}>
               <b>Status History</b>
               <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 8 }}>
                 {(data as any).status_logs?.map((log: any) => (

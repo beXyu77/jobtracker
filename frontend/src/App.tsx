@@ -35,16 +35,20 @@ export default function App() {
   if (!me) return <LoginPage onSuccess={loadMe} />;
 
   return (
-    <div>
-      <div style={{ padding: 24, display: "flex", justifyContent: "space-between" }}>
-        <div>
-          <h1 style={{ margin: 0 }}>JobTracker</h1>
-          <div style={{ fontSize: 14, opacity: 0.7 }}>
-            Logged in as {me.email}
+    <div style={{ background: "#ffffff", minHeight: "100vh" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 5, background: "#000000", backdropFilter: "blur(10px)", borderBottom: "1px solid #e8e8ee" }}>
+        <div style={{ padding: 18, maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, letterSpacing: -0.3, color:"#ffffff" }}>Job Tracker</h1>
+            <div style={{ fontSize: 13, opacity: 0.7, color:"#ffffff" }}>Logged in as {me.email}</div>
           </div>
+          <button
+            onClick={logout}
+            style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", background: "white", cursor: "pointer" }}
+          >
+            Logout
+          </button>
         </div>
-
-        <button onClick={logout}>Logout</button>
       </div>
 
       <KanbanBoard />

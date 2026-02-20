@@ -25,34 +25,36 @@ export default function CreateApplicationForm() {
   };
 
   return (
-    <form onSubmit={onSubmit} style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-      <input
-        value={company}
-        onChange={(e) => setCompany(e.target.value)}
-        placeholder="Company"
-        style={{ padding: 8, minWidth: 200 }}
-      />
-      <input
-        value={position}
-        onChange={(e) => setPosition(e.target.value)}
-        placeholder="Position"
-        style={{ padding: 8, minWidth: 200 }}
-      />
-      <select value={status} onChange={(e) => setStatus(e.target.value as any)} style={{ padding: 8 }}>
-        {STATUSES.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </select>
+    <div style={{ background: "white", border: "1px solid #ececf3", borderRadius: 16, padding: 12, marginBottom: 16 }}>
+      <form onSubmit={onSubmit} style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        <input
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          placeholder="Company"
+          style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }}
+        />
+        <input
+          value={position}
+          onChange={(e) => setPosition(e.target.value)}
+          placeholder="Position"
+          style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }}
+        />
+        <select value={status} onChange={(e) => setStatus(e.target.value as any)} style={{ padding: 10, borderRadius: 12, border: "1px solid #e5e7eb" }}>
+          {STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
 
-      <button type="submit" disabled={createMut.isPending} style={{ padding: "8px 12px" }}>
-        {createMut.isPending ? "Creating..." : "Add"}
-      </button>
+        <button type="submit" disabled={createMut.isPending} style={{ padding: "10px 12px", borderRadius: 12, border: "1px solid #111827", background: "#111827", color: "white" }}>
+          {createMut.isPending ? "Creating..." : "Add"}
+        </button>
 
-      {createMut.isError && (
-        <span style={{ color: "crimson" }}>Create failed</span>
-      )}
-    </form>
+        {createMut.isError && (
+          <span style={{ color: "crimson" }}>Create failed</span>
+        )}
+      </form>
+    </div>
   );
 }
